@@ -1,0 +1,23 @@
+predictor,study,correlation,label
+Structured Interviews,0,.51,Structured Interviews: .51
+Job Knowledge,0,.48,Job Knowledge: .48
+Empirical Biodata,0,.35,Empirical Biodata: .35
+Work Sample,0,.54,Work Sample: .54
+Integrity,0,.51,Integrity: .51
+Cognitive Ability,0,.41,Cognitive Ability: .41
+Assessment Centers,0,.37,Assessment Centers: .37
+Interests,0,.10,Interests: .10
+Conscientiousness,0,.31,Conscientiousness: .31
+Unstructured Interviews,0,.38,Unstructured Interviews: .38
+Job Experience,0,.18,Job Experience: .18
+Structured Interviews,1,.42,.42
+Job Knowledge,1,.40,.40
+Empirical Biodata,1,.38,.38
+Work Sample,1,.33,.33
+Integrity,1,.31,.31
+Cognitive Ability,1,.31,.31
+Assessment Centers,1,.29,.29
+Interests,1,.24,.24
+Conscientiousness,1,.19,.19
+Unstructured Interviews,1,.19,.19
+Job Experience,1,.07,.07

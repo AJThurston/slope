@@ -1,0 +1,99 @@
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(tidyverse)
+
+s2022 <- read.csv(here::here("data/sackett2022_long.csv"), header = TRUE)
+
+okabe_ito <- rev(c(
+    "#000000",
+    "#E69F00",
+    "#56B4E9",
+    "#009E73",
+        "#CC79A7",
+    "#336666", 
+    "#0072B2",
+    "#D55E00",
+    "#999999",
+    "#666666",
+    "#993399"
+    ))
+
+plot <- ggplot(
+    data = s2022, 
+    aes(
+        x = study,
+        y = correlation,
+        group = predictor,
+        color = predictor,
+        fill = predictor,
+        label = label
+        )
+        ) +
+  geom_vline(xintercept = 0, color = "#AAAAAA") +
+  geom_vline(xintercept = 1, color = "#AAAAAA") +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_label_repel(
+    data = filter(s2022, study == 0),
+    seed = 12345,
+    size = 4,
+    color = "white",
+    label.r = 0,
+    direction = "y",
+    segment.size = 0,
+    xlim = c(-2.5,-.05),
+    box.padding = .05
+  ) +
+  geom_label_repel(
+    data = filter(s2022, study == 1),
+    seed = 12345,
+    size = 4,
+    color = "white",
+    label.r = 0,
+    segment.size = 0,
+    xlim = c(1.05,Inf),
+    direction = "y",
+    force = .01,
+    box.padding = .05
+      ) +
+  annotate("text", label = "@AJThurston\n\nAndrew J. Thurston © 2025", x = -.75, y = .25, color = "#DEDEDE", size = 3) +
+  scale_x_continuous(
+    limits = c(-2,1.5), 
+    expand = c(0,0,0,0), 
+    position = "top",
+    breaks = c(-2,-1,0,1),
+    labels = c(
+        "", 
+        "",
+        "Schmidt &\nHunter (1998)",
+        "Sackett\net al. (2022)"
+        )
+        ) + 
+  scale_y_continuous(limits = c(0, .6), expand = c(0,0,0,0)) +
+  scale_color_manual(values = okabe_ito) +
+  scale_fill_manual(values = okabe_ito) +
+  labs(title = NULL, x = NULL, y = NULL) + 
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "white"),
+    strip.text.y.left = element_text(angle = 0),
+    strip.background = element_rect(color = "gray"),
+    strip.placement = "outside",                
+    axis.text.y = element_blank(),              
+    axis.ticks.y = element_blank(),
+    axis.text.x = element_text(size = 4*14/5),
+    panel.grid = element_blank(),            
+    legend.position = "none",                   
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5),
+    panel.margin = unit(c(0, 0, 0, 0), "null")
+  )
+
+ggsave(
+  filename = here::here("images/sackett2022.png"),
+  plot = plot,
+  width = 4,
+  height = 6.5,
+  dpi = 300
+)
+```
