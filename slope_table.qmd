@@ -1,0 +1,92 @@
+```{r}
+library(ggplot2)
+library(scales)
+
+s2022 <- read.csv(here::here("data/sackett2022.csv"), header = TRUE)
+
+trimmy <- function(x, accuracy = 2) {
+  ncode <- paste0("%.", accuracy, "f")
+  sub("^(-?)0.", "\\1.", sprintf(ncode, x))
+}
+
+okabe_ito <- c(
+  "Structured Interviews" = "#D55E00",
+  "Job Knowledge Tests" = "#FFFFFF",
+  "Empirical Biodata" = "#56B4E9",
+  "Work Samples" = "#66CCCC",
+  "Integrity Tests" = "#E69F00",
+  "Cognitive Ability Tests" = "#C0FFEE",
+  "Assessment Centers" = "#009E73",
+  "Vocational Interests" = "#CC66CC",
+  "Conscientiousness" = "#BBBBBB",
+  "Unstructured Interviews" = "#0072B2",
+  "Job Experience (Tenure)" = "#CC79A7"
+)
+
+ggplot(s2022, aes(x = x_predictor, y = y + .5, color = predictor)) +
+  geom_hline(yintercept = 1:12, color = "#0099997F", linetype = "dashed") +
+  geom_text(aes(label = predictor), hjust = 0, size = 5) +
+  geom_text(aes(x = x_lab_sh1998, label = trimmy(sh1998)), size = 5) +
+  geom_text(aes(x = x_lab_sea2022, label = trimmy(sea2022)), size = 5) +
+  geom_text(aes(x = x_change, label = trimmy(change)), size = 5) +
+  geom_text(aes(x = x_percent, label = percent), hjust = 1, nudge_x = .2, size = 5) +
+  geom_segment(aes(x = x_sh1998, xend = x_sea2022, y = y_sh1998, yend = y_sea2022)) +
+  geom_point(aes(x = x_sh1998, y = y_sh1998), size = 2) +
+  geom_point(aes(x = x_sea2022, y = y_sea2022), size = 2) +
+  geom_rect(aes(xmin = 4.25, xmax = 4.75, ymin = y + .05, ymax = y + .95), fill = NA) +
+  annotate("text", label = "ajthurston.com | @AJThurston\n\nAndrew J. Thurston © 2025", x = 6, y = 3.5, color = "#00999966", size = 3) +
+  scale_color_manual(values = okabe_ito) +
+  scale_x_continuous(
+    limits = c(1, 7.5),
+    breaks = c(1:7.5),
+    expand = c(0, 0, 0, 0),
+    labels = c(
+      "",
+      "Predictor                  ",
+      "",
+      "Schmidt\n& Hunter\n(1998)",
+      "Sackett\net al.\n(2022)",
+      "Change",
+      "Percent*\nChange"
+    ),
+    position = "top"
+  ) +
+  scale_y_continuous(
+    limits = c(1, 12),
+    breaks = c(1:12),
+    expand = c(0, .1, 0, .1)
+  ) +
+  labs(
+    title = "Selection method meta-analytic validity estimates",
+    subtitle = "Comparing Schmidt & Hunter (1998) and Sackett et al. (2022)",
+    x = NULL,
+    y = NULL,
+    caption = expression(
+  "Percent change refers to the change in estimate from 'r' to 't' = " *
+  frac((r[SH] %*% sqrt(1 - r[Sackett]^2)) - (r[Sackett] %*% sqrt(1 - r[SH]^2)),
+       r[SH] %*% sqrt(1 - r[Sackett]^2)) %*% 100
+)
+  ) +
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "#1B1F23"),
+    plot.title = element_text(color = "#009999", face = "bold", size = 6.25 * 14 / 5),
+    plot.subtitle = element_text(color = "#009999", face = "bold", size = 5 * 14 / 5),
+    plot.caption = element_text(color = "#EFEFEF7F", size = 3 * 14 / 5),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.x = element_text(color = "#FFFFFF", size = 5 * 14 / 5),
+    panel.grid = element_blank(),
+    legend.position = "none",
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 0)#,
+    #panel.margin = unit(c(5, 0, 5, 0), units  = "mm")
+    )
+
+ggsave(
+  filename = here::here("images/sackett2022_table.png"),
+  plot = last_plot(),
+  width = 6,
+  height = 7.5,
+  dpi = 300
+)
+```
