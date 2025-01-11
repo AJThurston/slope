@@ -3,7 +3,7 @@ library(ggplot2)
 library(ggrepel)
 library(tidyverse)
 
-s2022 <- read.csv(here::here("data/sackett2022_long.csv"), header = TRUE)
+s2022 <- read.csv("data/sackett2022_long.csv", header = TRUE)
 
 okabe_ito <- rev(c(
     "#000000",
@@ -90,7 +90,7 @@ plot <- ggplot(
   )
 
 ggsave(
-  filename = here::here("images/sackett2022.png"),
+  filename = "images/sackett2022.png",
   plot = plot,
   width = 4,
   height = 6.5,

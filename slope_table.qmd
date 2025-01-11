@@ -2,7 +2,7 @@
 library(ggplot2)
 library(scales)
 
-s2022 <- read.csv(here::here("data/sackett2022.csv"), header = TRUE)
+s2022 <- read.csv("data/sackett2022.csv", header = TRUE)
 
 trimmy <- function(x, accuracy = 2) {
   ncode <- paste0("%.", accuracy, "f")
@@ -83,7 +83,7 @@ ggplot(s2022, aes(x = x_predictor, y = y + .5, color = predictor)) +
     )
 
 ggsave(
-  filename = here::here("images/sackett2022_table.png"),
+  filename = "images/sackett2022_table.png",
   plot = last_plot(),
   width = 6,
   height = 7.5,
