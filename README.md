@@ -2,8 +2,6 @@
 
 Code for making slope charts.
 
-## Slope Chart
-![](/images/sackett2022.png)
-
-## Table Slope Chart
-![](/images/sackett2022_table.png)
+| **Slope Chart**                       | **Table Slope Chart**                |
+|--------------------------------------|-------------------------------------|
+| ![](/images/sackett2022.png)         | ![](/images/sackett2022_table.png)  |
