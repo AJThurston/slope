@@ -90,7 +90,7 @@ plot <- ggplot(
   )
 
 ggsave(
-  filename = "images/sackett2022.png",
+  filename = "images/slope.png",
   plot = plot,
   width = 4,
   height = 6.5,

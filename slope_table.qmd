@@ -83,7 +83,7 @@ ggplot(s2022, aes(x = x_predictor, y = y + .5, color = predictor)) +
     )
 
 ggsave(
-  filename = "images/sackett2022_table.png",
+  filename = "images/slope_table.png",
   plot = last_plot(),
   width = 6,
   height = 7.5,

@@ -1,0 +1,350 @@
+This is just a working file
+
+```{r}
+#| eval: false
+library(ggplot2)
+
+s2022 <- read.csv(here::here("data/sackett2022.csv"), header = T)
+
+ggplot(s2022, aes(x = Time_Point, y = Correlation, group = Predictor)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ Predictor, scales = "fixed", ncol = 1, strip.position = "left") +
+  labs(title = NULL,
+       x = NULL, 
+       y = "Correlation") +
+  theme_minimal() +
+    theme(
+    strip.text.y.left = element_text(angle = 0), # Forces horizontal text
+    strip.placement = "outside",                # Moves strips outside the plot
+    legend.position = "none"
+  )
+```
+
+```{r taketwo}
+#| eval: false
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Load your CSV file
+s2022 <- read.csv(here::here("data/sackett2022_long.csv"), header = TRUE)
+
+# Ensure the Time_Point factor levels are correctly ordered
+s2022 <- s2022 %>%
+  mutate(Time_Point = factor(Time_Point, 
+                             levels = c("Schmidt &\nHunter (1998)", "Sackett\net al. (2022)")))
+
+plot <- ggplot(s2022, aes(x = Time_Point, y = Correlation, group = Predictor, color = Predictor)) +
+  geom_line() +
+  geom_point() +
+  geom_text(
+    aes(label = gsub("^0", "", sprintf("%.2f", Correlation)), 
+        #vjust = ifelse(Correlation < .25, -1, 2),
+        hjust = ifelse(Time_Point == "Sackett\net al. (2022)", -0.3, 1.3)
+        ), 
+    size = 3
+  ) +
+  #facet_wrap(~ Predictor, ncol = 1, strip.position = "left") +
+  scale_x_discrete() + # Maintain default order
+  scale_y_continuous(limits = c(0,.6)) +
+  labs(title = NULL, x = NULL, y = NULL) + 
+  theme_minimal() +
+  theme(
+    plot.margin = margin(0, 0, 0, 0, "cm"),
+    plot.background = element_rect(fill = "white"),
+    strip.text.y.left = element_text(angle = 0), # Horizontal strip te
+    strip.background = element_rect(color = "gray"),
+    strip.placement = "outside",                # Move strips outside
+    axis.text.y = element_blank(),              # Remove y-axis text
+    axis.ticks.y = element_blank(),             # Remove y-axis ticks
+    legend.position = "none",                   # Remove legend
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5) 
+  )
+plot
+ggsave(
+  filename = here::here("images/sackett2022.png"), # File path
+  plot = plot,
+  width = 4.5,      # Width in inches
+  height = 6,    # Height in inches (7 times the width)
+  dpi = 300       # High resolution for websites
+)
+```
+
+![](/images/sackett2022.png)
+
+```{r takethree}
+library(gt)
+library(dplyr)
+library(gtExtras)
+
+s2022 <- read.csv(here::here("data/sackett2022.csv"), header = TRUE)
+
+# Ensure the Time_Point factor levels are correctly ordered
+s2022 <- s2022 %>%
+  mutate(Time_Point = factor(Time_Point, 
+                             levels = c("Schmidt &\nHunter (1998)", "Sackett\net al. (2022)")))
+
+# Prepare the data for the table
+gt_sparkline_tab <- s2022 %>%
+  dplyr::group_by(Predictor) %>%
+  dplyr::summarize(
+    Correlation_Data = list(Correlation),
+     = sum(n),
+    timeseries = list(n),  
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  gt_plt_sparkline(Correlation_Data,
+    type = "default",
+    same_limit = TRUE
+  )
+# Display the table
+gt_sparkline_tab
+```
+
+```{r takefour}
+library(gt)
+library(dplyr)
+library(gtExtras)
+
+# Load your CSV data
+s2022 <- read.csv(here::here("data/sackett2022.csv"), header = TRUE)
+
+s2022 <- s2022 %>%
+  rowwise() %>%
+  mutate(Sparkline_Data = list(c(sh1998, sea2022))) %>%
+  ungroup()
+
+# Create the gt table with sparklines
+gt_sparkline_tab <- s2022 %>%
+  gt() %>%
+  gt_plt_sparkline(
+    Sparkline_Data,
+    type = "default",
+    same_limit = TRUE
+    ) %>%
+  cols_label(
+    Predictor = "Predictor",
+    sh1998 = "Schmidt &\nHunter (1998)",
+    sea2022 = "Sackett\net al. (2022)",
+    Sparkline_Data = "Trend"
+  ) %>%
+  tab_header(
+    title = "Predictor Correlations Across Studies",
+    subtitle = "Schmidt & Hunter (1998) vs. Sackett et al. (2022)"
+  ) %>%
+  tab_options(
+    heading.align = "left",
+    heading.border.bottom.width = px(0),
+    table.border.top.width = px(0), 
+    table.background.color = "#D1E6E6",
+    table.width = pct(100),
+    table_body.hlines.color = "#FFFFFF",
+    table_body.hlines.width = px(2),
+    table_body.border.bottom.color = "#FFFFFF",
+    stub.border.width = px(0),
+    column_labels.border.top.width = px(0),
+    column_labels.border.bottom.color = "#FFFFFF"
+  )
+
+# Display the table
+gt_sparkline_tab
+
+
+
+```
+
+```{r takefive}
+library(ggplot2)
+library(ggrepel)
+library(tidyverse)
+
+s2022 <- read.csv(here::here("data/sackett2022_long.csv"), header = TRUE)
+
+okabe_ito <- rev(c(
+  "#000000",
+  "#E69F00",
+  "#56B4E9",
+  "#009E73",
+  "#CC79A7",
+  "#336666",
+  "#0072B2",
+  "#D55E00",
+  "#999999",
+  "#666666",
+  "#993399"
+))
+
+plot <- ggplot(
+  data = s2022,
+  aes(
+    x = study,
+    y = correlation,
+    group = predictor,
+    color = predictor,
+    fill = predictor,
+    label = label
+  )
+) +
+  geom_vline(xintercept = 0, color = "#AAAAAA") +
+  geom_vline(xintercept = 1, color = "#AAAAAA") +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_label_repel(
+    data = filter(s2022, study == 0),
+    seed = 12345,
+    size = 4,
+    color = "white",
+    label.r = 0,
+    direction = "y",
+    segment.size = 0,
+    xlim = c(-2.5, -.05),
+    box.padding = .05
+  ) +
+  geom_label_repel(
+    data = filter(s2022, study == 1),
+    seed = 12345,
+    size = 4,
+    color = "white",
+    label.r = 0,
+    segment.size = 0,
+    xlim = c(1.05, Inf),
+    direction = "y",
+    force = .01,
+    box.padding = .05
+  ) +
+  annotate("text", label = "@AJThurston\n\nAndrew J. Thurston © 2025", x = -.75, y = .25, color = "#DEDEDE", size = 3) +
+  scale_x_continuous(
+    limits = c(-2, 1.5),
+    expand = c(0, 0, 0, 0),
+    position = "top",
+    breaks = c(-2, -1, 0, 1),
+    labels = c(
+      "",
+      "",
+      "Schmidt &\nHunter (1998)",
+      "Sackett\net al. (2022)"
+    )
+  ) +
+  scale_y_continuous(limits = c(0, .6), expand = c(0, 0, 0, 0)) +
+  scale_color_manual(values = okabe_ito) +
+  scale_fill_manual(values = okabe_ito) +
+  labs(title = NULL, x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "white"),
+    strip.text.y.left = element_text(angle = 0),
+    strip.background = element_rect(color = "gray"),
+    strip.placement = "outside",
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.x = element_text(size = 4 * 14 / 5),
+    panel.grid = element_blank(),
+    legend.position = "none",
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5),
+    panel.margin = unit(c(0, 0, 0, 0), "null")
+  )
+
+ggsave(
+  filename = here::here("images/sackett2022.png"),
+  plot = plot,
+  width = 4,
+  height = 6.5,
+  dpi = 300
+)
+```
+
+```{r takesix}
+library(ggplot2)
+library(scales)
+
+s2022 <- read.csv(here::here("data/sackett2022.csv"), header = TRUE)
+
+trimmy <- function(x, accuracy = 2) {
+  ncode <- paste0("%.", accuracy, "f")
+  sub("^(-?)0.", "\\1.", sprintf(ncode, x))
+}
+
+okabe_ito <- c(
+  "Structured Interviews" = "#D55E00",
+  "Job Knowledge Tests" = "#FFFFFF",
+  "Empirical Biodata" = "#56B4E9",
+  "Work Samples" = "#66CCCC",
+  "Integrity Tests" = "#E69F00",
+  "Cognitive Ability Tests" = "#C0FFEE",
+  "Assessment Centers" = "#009E73",
+  "Vocational Interests" = "#CC66CC",
+  "Conscientiousness" = "#BBBBBB",
+  "Unstructured Interviews" = "#0072B2",
+  "Job Experience (Tenure)" = "#CC79A7"
+)
+
+ggplot(s2022, aes(x = x_predictor, y = y + .5, color = predictor)) +
+  geom_hline(yintercept = 1:12, color = "#0099997F", linetype = "dashed") +
+  geom_text(aes(label = predictor), hjust = 0, size = 5) +
+  geom_text(aes(x = x_lab_sh1998, label = trimmy(sh1998)), size = 5) +
+  geom_text(aes(x = x_lab_sea2022, label = trimmy(sea2022)), size = 5) +
+  geom_text(aes(x = x_change, label = trimmy(change)), size = 5) +
+  geom_text(aes(x = x_percent, label = percent), hjust = 1, nudge_x = .2, size = 5) +
+  geom_segment(aes(x = x_sh1998, xend = x_sea2022, y = y_sh1998, yend = y_sea2022)) +
+  geom_point(aes(x = x_sh1998, y = y_sh1998), size = 2) +
+  geom_point(aes(x = x_sea2022, y = y_sea2022), size = 2) +
+  geom_rect(aes(xmin = 4.25, xmax = 4.75, ymin = y + .05, ymax = y + .95), fill = NA) +
+  annotate("text", label = "ajthurston.com | @AJThurston\n\nAndrew J. Thurston © 2025", x = 6, y = 3.5, color = "#00999966", size = 3) +
+  scale_color_manual(values = okabe_ito) +
+  scale_x_continuous(
+    limits = c(1, 7.5),
+    breaks = c(1:7.5),
+    expand = c(0, 0, 0, 0),
+    labels = c(
+      "",
+      "Predictor                  ",
+      "",
+      "Schmidt &\nHunter\n(1998)",
+      "Sackett\net al.\n(2022)",
+      "Change",
+      "Percent*\nChange"
+    ),
+    position = "top"
+  ) +
+  scale_y_continuous(
+    limits = c(1, 12),
+    breaks = c(1:12),
+    expand = c(0, .1, 0, .1)
+  ) +
+  labs(
+    title = "Selection method meta-analytic validity estimates",
+    subtitle = "Comparing Schmidt & Hunter (1998) and Sackett et al. (2022)",
+    x = NULL,
+    y = NULL,
+    caption = expression(
+  "Percent change refers to the change in estimate from 'r' to 't' = " *
+  frac((r[SH] %*% sqrt(1 - r[Sackett]^2)) - (r[Sackett] %*% sqrt(1 - r[SH]^2)),
+       r[SH] %*% sqrt(1 - r[Sackett]^2)) %*% 100
+)
+  ) +
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "#1B1F23"),
+    plot.title = element_text(color = "#009999", face = "bold", size = 6.25 * 14 / 5),
+    plot.subtitle = element_text(color = "#009999", face = "bold", size = 5 * 14 / 5),
+    plot.caption = element_text(color = "#EFEFEF7F", size = 3 * 14 / 5),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.x = element_text(color = "#FFFFFF", size = 5 * 14 / 5),
+    panel.grid = element_blank(),
+    legend.position = "none",
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 0)#,
+    #panel.margin = unit(c(5, 0, 5, 0), units  = "mm")
+    )
+
+ggsave(
+  filename = "images/sackett2022_table.png",
+  plot = last_plot(),
+  width = 6,
+  height = 7.5,
+  dpi = 300
+)
+```
